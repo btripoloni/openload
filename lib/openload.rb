@@ -62,6 +62,14 @@ class OpenLoad
     get_a_request_and_return_in_a_struct("/remotedl/status#{login_parameter(true)}#{key_parameter}#{http_parameter('limit', limit)}#{http_parameter('id', id)}")
   end
 
+  # This method return a list of all folders.
+  # You need a login and api kei
+  # This method return returns a hash
+  def folder_list(folder = nil)
+    response = get_a_request("/file/listfolder?login=#{@api_login}&key=#{@api_key}#{http_parameter('folder', folder)}")
+    JSON.parse(response)
+  end
+
   private
   def get_a_request(path)
     HTTParty.get("#{api_url}#{path}").body
