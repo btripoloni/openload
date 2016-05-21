@@ -12,9 +12,7 @@ class OpenLoad
 
   def acount_info
     if is_logged?
-      request = get_a_request("/account/info?login=#{@api_login}&key=#{@api_key}")
-      data_hash = JSON.parse(request)
-      OpenStruct.new(data_hash)
+      get_a_request_and_return_in_a_struct("/account/info?login=#{@api_login}&key=#{@api_key}")
     else
       raise "You need to insert a login and a key to use this method!"
     end
@@ -22,16 +20,12 @@ class OpenLoad
 
   #Get the ticket to download a file
   def download_ticket(file)
-    request = get_a_request("/file/dlticket?file=#{file}#{login_parameter}#{key_parameter}")
-    data_hash = JSON.parse(request)
-    OpenStruct.new(data_hash)
+    get_a_request_and_return_in_a_struct("/file/dlticket?file=#{file}#{login_parameter}#{key_parameter}")
   end
 
   # Get the download link from a ticket
   def download_link(file, ticket, captcha_response = nil)
-    request = get_a_request("/file/dl?file=#{file}&ticket=#{ticket}#{http_parameter('captcha_response', captcha_response)}")
-    data_hash = JSON.parse(request)
-    OpenStruct.new(data_hash)
+    get_a_request_and_return_in_a_struct("/file/dl?file=#{file}&ticket=#{ticket}#{http_parameter('captcha_response', captcha_response)}")
   end
 
   # Get the download Link without ticket
@@ -50,18 +44,14 @@ class OpenLoad
   # This method return a link that you can make uploads.
   # Warning: this links expire in a few hours, always check the .
   def upload_link(folder = nil, sha1 = nil, httponly = nil)
-    response = get_a_request("/file/ul#{login_parameter(true)}#{key_parameter}#{http_parameter('folder', folder)}#{http_parameter('sha1', sha1)}#{http_parameter('httponly', httponly)}")
-    data_hash = JSON.parse(response)
-    OpenStruct.new(data_hash)
+    get_a_request_and_return_in_a_struct("/file/ul#{login_parameter(true)}#{key_parameter}#{http_parameter('folder', folder)}#{http_parameter('sha1', sha1)}#{http_parameter('httponly', httponly)}")
   end
 
   # This method make a upload of a link from the web
   # Remember: You need a login and key api to use this method.
   def remote_upload(url, folder = nil , headers = nil)
     if is_logged?
-      response = get_a_request("/remotedl/add#{login_parameter(true)}#{key_parameter}#{http_parameter('url', url)}#{http_parameter('folder',folder)}#{http_parameter('headers', headers)}")
-      data_hash = JSON.parse(response)
-      OpenStruct.new(data_hash)
+      get_a_request_and_return_in_a_struct("/remotedl/add#{login_parameter(true)}#{key_parameter}#{http_parameter('url', url)}#{http_parameter('folder',folder)}#{http_parameter('headers', headers)}")
     else
       raise "You need a login and a api key to make remote uploads!"
     end
@@ -69,14 +59,12 @@ class OpenLoad
 
   # This method cheks the status of the remote uploads.
   def check_remote_upload_status(id = nil, limit = nil)
-    response = get_a_request("/remotedl/status#{login_parameter(true)}#{key_parameter}#{http_parameter('limit', limit)}#{http_parameter('id', id)}")
-    data_hash = JSON.parse(response)
-    OpenStruct.new(data_hash)
+    get_a_request_and_return_in_a_struct("/remotedl/status#{login_parameter(true)}#{key_parameter}#{http_parameter('limit', limit)}#{http_parameter('id', id)}")
   end
 
   private
   def get_a_request(path)
-    HTTParty.get("#{api_url}#{'/' if path[0] != '/' }#{path}").body
+    HTTParty.get("#{api_url}#{path}").body
   end
 
   def http_parameter(name, value, first_parameter = false)
@@ -93,5 +81,11 @@ class OpenLoad
 
   def is_logged?
     @api_key && @api_login
+  end
+
+  def get_a_request_and_return_in_a_struct(req)
+    response = get_a_request(req)
+    data_hash = JSON.parse(response)
+    OpenStruct.new(data_hash)
   end
 end
