@@ -1,7 +1,7 @@
 require 'httparty'
 require 'ostruct'
 
-class openload
+class OpenLoad
   @api_url = "https://api.openload.co/1"
 
   # Create a new instace using the api-login and the api-key (both are optional)
@@ -11,7 +11,7 @@ class openload
   end
 
   def acount_info
-    if login && key
+    if is_logged?
       request = get_a_request("/account/info?login=#{@api_login}&key=#{@api_key}")
       data_hash = JSON.parse(request)
       OpenStruct.new(data_hash)
@@ -47,21 +47,36 @@ class openload
     JSON.parse(response)
   end
 
+  def upload_link(folder, sha1, httponly)
+    response = get_a_request("/file/ul#{login_parameter(true)}#{key_parameter}#{http_parameter('folder', folder)}#{http_parameter('sha1', sha1)}#{http_parameter('httponly', httponly)}")
+    data_hash = JSON.parse(response)
+    OpenStruct.new(data_hash)
+  end
+
+  def remote_upload(url, folder, headers)
+    response = get_a_request("/remotedl/add#{login_parameter(true)}#{key_parameter}#{http_parameter('url', url)}#{http_parameter('folder',folder)}#{http_parameter('headers', headers)}")
+    data_hash = JSON.parse(response)
+    OpenStruct.new(data_hash)
+  end
+
   private
   def get_a_request(path)
     HTTParty.get("#{api_url}#{'/' if path[0] != '/' }#{path}").body
   end
 
-  def http_parameter(name, value)
-    "&#{name}=#{value}" if value
+  def http_parameter(name, value, first_parameter = false)
+    "#{'?' if first_parameter}#{'&' unless first_parameter}#{name}=#{value}" if value
   end
 
-  def login_parameter()
-    http_parameter('login', @api_login)
+  def login_parameter(first_parameter = false)
+    http_parameter('login', @api_login, first_parameter)
   end
 
   def key_parameter()
     http_parameter('key', @api_key)
   end
 
+  def is_logged?
+    @api_key && @api_login
+  end
 end
