@@ -41,20 +41,35 @@ class OpenLoad
   end
 
   # This method return the info of a file
-  # Warning this method rertuns a hash
+  # Warning: this method rertuns a hash
   def file_info(file)
     response = get_a_request("/file/info?file=#{file}#{login_parameter}#{key_parameter}")
     JSON.parse(response)
   end
 
-  def upload_link(folder, sha1, httponly)
+  # This method return a link that you can make uploads.
+  # Warning: this links expire in a few hours, always check the .
+  def upload_link(folder = nil, sha1 = nil, httponly = nil)
     response = get_a_request("/file/ul#{login_parameter(true)}#{key_parameter}#{http_parameter('folder', folder)}#{http_parameter('sha1', sha1)}#{http_parameter('httponly', httponly)}")
     data_hash = JSON.parse(response)
     OpenStruct.new(data_hash)
   end
 
-  def remote_upload(url, folder, headers)
-    response = get_a_request("/remotedl/add#{login_parameter(true)}#{key_parameter}#{http_parameter('url', url)}#{http_parameter('folder',folder)}#{http_parameter('headers', headers)}")
+  # This method make a upload of a link from the web
+  # Remember: You need a login and key api to use this method.
+  def remote_upload(url, folder = nil , headers = nil)
+    if is_logged?
+      response = get_a_request("/remotedl/add#{login_parameter(true)}#{key_parameter}#{http_parameter('url', url)}#{http_parameter('folder',folder)}#{http_parameter('headers', headers)}")
+      data_hash = JSON.parse(response)
+      OpenStruct.new(data_hash)
+    else
+      raise "You need a login and a api key to make remote uploads!"
+    end
+  end
+
+  # This method cheks the status of the remote uploads.
+  def check_remote_upload_status(id = nil, limit = nil)
+    response = get_a_request("/remotedl/status#{login_parameter(true)}#{key_parameter}#{http_parameter('limit', limit)}#{http_parameter('id', id)}")
     data_hash = JSON.parse(response)
     OpenStruct.new(data_hash)
   end
