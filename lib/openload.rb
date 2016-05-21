@@ -28,12 +28,6 @@ class OpenLoad
     get_a_request_and_return_in_a_struct("/file/dl?file=#{file}&ticket=#{ticket}#{http_parameter('captcha_response', captcha_response)}")
   end
 
-  # Get the download Link without ticket
-  def download_link_with_ticket(file)
-    ticket = get_download_ticket(file)
-    get_download_link(file, ticket.response.ticket)
-  end
-
   # This method return the info of a file
   # Warning: this method rertuns a hash
   def file_info(file)
@@ -68,6 +62,19 @@ class OpenLoad
   def folder_list(folder = nil)
     response = get_a_request("/file/listfolder?login=#{@api_login}&key=#{@api_key}#{http_parameter('folder', folder)}")
     JSON.parse(response)
+  end
+
+  # This method convert files to stream format (mp4/h.264)
+  def convert_to_stream(file)
+    get_a_request_and_return_in_a_struct("/file/convert?login=#{@api_login}&key=#{@api_key}&file=#{file}")
+  end
+
+  def show_converted_files(folder = nil)
+    get_a_request_and_return_in_a_struct("/file/runningconverts?login=#{@api_login}&key=#{@api_key}}#{http_parameter('folder',folder)}")
+  end
+
+  def get_splash_image(file)
+    get_a_request_and_return_in_a_struct("/file/getsplash?login=#{@api_login}&key=#{@api_key}&file=#{file}")
   end
 
   private
