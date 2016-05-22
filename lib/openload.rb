@@ -10,7 +10,7 @@ class OpenLoad
     @api_key   = key
   end
 
-  def acount_info
+  def account_info
     if is_logged?
       get_a_request_and_return_in_a_struct("/account/info?login=#{@api_login}&key=#{@api_key}")
     else
